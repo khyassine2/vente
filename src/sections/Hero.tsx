@@ -10,6 +10,13 @@ import { useGsapContext } from '@/hooks/useGsapContext';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d';
 
+// Three short proofs sit under the calls to action instead of an empty panel.
+const HERO_PROOFS = [
+  { title: 'Coupé à la main', detail: 'Atelier de Casablanca' },
+  { title: 'Livraison offerte', detail: 'Dès 800 MAD' },
+  { title: 'Retours 14 jours', detail: 'Échange sans frais' },
+];
+
 export const Hero = () => {
   const rootRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -61,23 +68,28 @@ export const Hero = () => {
   return (
     <section
       ref={rootRef}
-      className="relative overflow-hidden bg-[radial-gradient(120%_100%_at_50%_0%,#efe4d2_0%,#e8d8bd_38%,#d8c19c_72%,#c7a878_100%)] py-20 md:py-28"
+      className="relative overflow-hidden bg-[linear-gradient(180deg,#faf7f2_0%,#f4ece0_55%,#ecdfcc_100%)] pt-28 pb-20 text-ink md:pt-36 md:pb-28"
     >
-      {/* Soft top glow, echoing the arch light in the reference layout. */}
+      {/* A single warm wash off the top-right keeps the ground from going flat
+          without muddying the paper the type sits on. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(255,252,244,0.65)_0%,transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_78%_18%,rgba(227,213,193,0.55)_0%,transparent_68%)]"
       />
 
       <div className="shell relative z-10 grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
         <div className="text-center lg:text-left">
-          <p data-hero-fade className="label-micro text-forest/70 opacity-0">
+          <p
+            data-hero-fade
+            className="flex items-center justify-center gap-3 label-micro text-forest opacity-0 lg:justify-start"
+          >
+            <span aria-hidden className="h-px w-8 bg-terracotta" />
             Nouvelle saison
           </p>
 
           <h1
             ref={headingRef}
-            className="mt-5 font-display text-display font-light text-ink opacity-0"
+            className="mt-6 font-display text-display font-light text-forest opacity-0"
           >
             Fil
             <span className="text-terracotta">&amp;</span>
@@ -86,7 +98,7 @@ export const Hero = () => {
 
           <p
             data-hero-fade
-            className="mx-auto mt-6 max-w-[46ch] text-[0.9375rem] leading-relaxed text-ink/70 opacity-0 lg:mx-0"
+            className="mx-auto mt-6 max-w-[46ch] text-base leading-relaxed text-ink/75 opacity-0 lg:mx-0"
           >
             Des pièces coupées à la main, élégantes et intemporelles, pensées
             pour accompagner vos journées avec douceur.
@@ -94,26 +106,44 @@ export const Hero = () => {
 
           <div
             data-hero-fade
-            className="mt-9 flex flex-wrap items-center justify-center gap-3 opacity-0 lg:justify-start"
+            className="mt-10 flex flex-wrap items-center justify-center gap-4 opacity-0 lg:justify-start"
           >
             <Magnetic>
               <Link
                 href="/boutique"
-                className="inline-flex h-6 items-center justify-center bg-forest px-8 label-micro text-paper transition-colors duration-300 hover:bg-ink"
+                className="inline-flex h-12 items-center justify-center bg-forest px-9 label-micro text-paper transition-colors duration-300 hover:bg-ink"
               >
                 Découvrir la collection
               </Link>
             </Magnetic>
+
+            <Link
+              href="/atelier"
+              className="link-underline label-micro text-forest transition-opacity duration-300 hover:opacity-70"
+            >
+              Notre atelier
+            </Link>
           </div>
+
+          <ul
+            data-hero-fade
+            className="mt-12 grid grid-cols-1 gap-6 border-t border-forest/12 pt-8 opacity-0 sm:grid-cols-3"
+          >
+            {HERO_PROOFS.map(proof => (
+              <li key={proof.title} className="text-center lg:text-left">
+                <p className="label-micro text-forest">{proof.title}</p>
+                <p className="mt-2 text-[0.8125rem] text-ink/60">{proof.detail}</p>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Two nested arches: the photograph, and a smaller wordmark arch
-            beside it — mirrors the reference layout while staying inside the
-            site's own palette and type. */}
-        <div className="relative mx-auto flex w-full max-w-md items-end justify-center gap-4 lg:max-w-none lg:justify-end">
+        {/* The photograph leads; a narrower arch beside it carries the season
+            note so the pairing reads as editorial rather than decorative. */}
+        <div className="relative mx-auto flex w-full max-w-md items-end justify-center gap-5 lg:max-w-none lg:justify-end">
           <div
             data-hero-arch
-            className="relative aspect-[3/4] w-[68%] overflow-hidden rounded-t-[999px] bg-paper-dim opacity-0 shadow-[0_30px_60px_-20px_rgba(20,32,27,0.35)]"
+            className="relative aspect-[3/4] w-[64%] overflow-hidden rounded-t-[999px] bg-paper-dim opacity-0 shadow-[0_40px_80px_-32px_rgba(31,61,51,0.45)]"
           >
             <ProductImage
               source={HERO_IMAGE}
@@ -126,17 +156,20 @@ export const Hero = () => {
 
           <div
             data-hero-arch
-            className="relative flex aspect-[3/4] w-[38%] flex-col items-center justify-center gap-4 self-stretch overflow-hidden rounded-t-[999px] border border-forest/15 bg-paper/70 opacity-0 shadow-[0_20px_50px_-25px_rgba(20,32,27,0.3)] backdrop-blur-sm"
+            className="relative flex aspect-[9/16] w-[36%] flex-col justify-between overflow-hidden rounded-t-[999px] bg-forest p-6 text-paper opacity-0 shadow-[0_40px_80px_-32px_rgba(31,61,51,0.5)]"
           >
-            <p className="rotate-0 font-display text-3xl leading-none tracking-[0.14em] text-forest uppercase">
+            <p className="pt-6 text-center font-display text-2xl leading-none tracking-[0.14em] uppercase">
               F
               <span className="text-terracotta">&amp;</span>
               L
             </p>
-            <span aria-hidden className="text-terracotta">✦</span>
-            <p className="label-micro px-4 text-center text-forest/70">
-              Fil & Ligne
-            </p>
+
+            <div className="text-center">
+              <p className="font-display text-3xl leading-none">24</p>
+              <p className="mt-3 label-micro text-paper/60">
+                Pièces en série limitée
+              </p>
+            </div>
           </div>
         </div>
       </div>

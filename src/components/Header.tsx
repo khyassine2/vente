@@ -96,7 +96,7 @@ export const Header = () => {
     <header
       ref={headerRef}
       data-solid={isHome ? 'false' : 'true'}
-      className="fixed inset-x-0 top-0 z-90 border-b border-transparent text-paper transition-colors duration-500 will-change-transform data-[solid=true]:border-line data-[solid=true]:bg-paper/92 data-[solid=true]:text-ink data-[solid=true]:backdrop-blur-md"
+      className="fixed inset-x-0 top-0 z-90 border-b border-transparent text-ink transition-colors duration-500 will-change-transform data-[solid=true]:border-line data-[solid=true]:bg-paper/92 data-[solid=true]:backdrop-blur-md"
     >
       <div className="shell flex h-16 items-center gap-4 md:h-20 lg:grid lg:grid-cols-[auto_1fr_auto] lg:gap-8">
         <div className="flex items-center gap-2 lg:gap-0">
