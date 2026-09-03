@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { deleteProduct } from '@/admin/products';
+import { DeleteProductButton } from '@/components/admin/DeleteProductButton';
 import { listProducts } from '@/data/products';
 import { formatPrice } from '@/utils/format';
 
@@ -57,9 +58,7 @@ export default async function AdminProductsPage() {
                 await deleteProduct(product.id);
               }}
             >
-              <button type="submit" className="label-micro text-terracotta hover:opacity-70">
-                Supprimer
-              </button>
+              <DeleteProductButton productName={product.name} />
             </form>
           </li>
         ))}

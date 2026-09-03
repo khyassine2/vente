@@ -14,9 +14,19 @@ const requireAdmin = async () => {
 
 const IMAGE_BUCKET = 'product-images';
 
-/** Uploads one product photo to storage and returns its public URL. */
-export const uploadProductImage = async (file: File) => {
-  await requireAdmin();
+/**
+ * Uploads one product photo to storage and returns its public URL.
+ *
+ * Called directly from a change handler rather than as a form action, so an
+ * expired session must come back as a value: `redirect()` throws, and that
+ * throw surfaces to the browser as a 500 instead of a navigation.
+ */
+export const uploadProductImage = async (
+  file: File,
+): Promise<{ url: string } | { error: string }> => {
+  if (!(await isAdminAuthenticated())) {
+    return { error: 'Session expirée. Reconnectez-vous pour envoyer des images.' };
+  }
 
   const extension = file.name.split('.').pop() ?? 'jpg';
   const path = `${crypto.randomUUID()}.${extension}`;
@@ -26,12 +36,12 @@ export const uploadProductImage = async (file: File) => {
     .upload(path, file, { contentType: file.type });
 
   if (error) {
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   const { data } = supabaseAdmin.storage.from(IMAGE_BUCKET).getPublicUrl(path);
 
-  return data.publicUrl;
+  return { url: data.publicUrl };
 };
 
 /** Replaces every variant and image row for a product with the given sets. */

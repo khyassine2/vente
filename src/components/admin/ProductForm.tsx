@@ -1,11 +1,12 @@
 'use client';
 
-import type { CategorySlug, Product } from '@/data/types';
+import type { CategorySlug, Product, ProductColor } from '@/data/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { uploadProductImage } from '@/admin/products';
 import { Button } from '@/components/Button';
 import { CATEGORIES } from '@/data/categories';
+import { ALL_SIZES, PRESET_COLORS, SIZE_SCALES } from '@/data/variants';
 
 const fieldClass = 'mt-2 w-full border border-line bg-paper px-4 py-3 text-ink outline-none focus:border-forest';
 const labelClass = 'label-micro text-sage';
@@ -38,9 +39,6 @@ export const ProductForm = (props: ProductFormProps) => {
   const [draft, setDraft] = useState<Omit<Product, 'id'>>(
     props.product ?? emptyDraft(),
   );
-  const [colorsText, setColorsText] = useState(
-    (props.product?.colors ?? []).map(color => `${color.name} | ${color.hex}`).join('\n'),
-  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -57,11 +55,24 @@ export const ProductForm = (props: ProductFormProps) => {
     );
   };
 
-  const parseColors = (value: string) =>
-    linesToList(value).map((line) => {
-      const [name, hex] = line.split('|').map(part => part.trim());
-      return { name: name ?? '', hex: hex ?? '#000000' };
-    }).filter(color => color.name);
+  // Sizes and colours are kept in catalogue order, not click order, so two
+  // products with the same selection always store the same sequence.
+  const toggleSize = (size: string) => {
+    const next = draft.sizes.includes(size)
+      ? draft.sizes.filter(item => item !== size)
+      : [...draft.sizes, size];
+
+    update('sizes', ALL_SIZES.filter(item => next.includes(item)));
+  };
+
+  const toggleColor = (color: ProductColor) => {
+    const next = draft.colors.some(item => item.name === color.name)
+      ? draft.colors.filter(item => item.name !== color.name)
+      : [...draft.colors, color];
+
+    update('colors', PRESET_COLORS.filter(preset =>
+      next.some(item => item.name === preset.name)));
+  };
 
   const onUploadImages = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) {
@@ -70,19 +81,34 @@ export const ProductForm = (props: ProductFormProps) => {
 
     setUploading(true);
 
-    try {
-      const uploaded = await Promise.all(
-        Array.from(fileList).map(file => uploadProductImage(file)),
-      );
-      update('images', [...draft.images.filter(Boolean), ...uploaded] as Product['images']);
-    } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Échec de l’envoi des images.');
-    } finally {
-      setUploading(false);
+    const results = await Promise.all(
+      Array.from(fileList).map(file => uploadProductImage(file)),
+    );
+
+    setUploading(false);
+
+    const failure = results.find(result => 'error' in result);
+    if (failure && 'error' in failure) {
+      window.alert(failure.error);
     }
+
+    const uploaded = results.flatMap(result => ('url' in result ? [result.url] : []));
+    if (uploaded.length === 0) {
+      return;
+    }
+
+    // Appends onto the latest images, not the ones captured before the upload.
+    setDraft(current => ({
+      ...current,
+      images: [...current.images.filter(Boolean), ...uploaded] as Product['images'],
+    }));
   };
 
   const onRemoveImage = (index: number) => {
+    if (!window.confirm('Retirer cette image de la pièce ?')) {
+      return;
+    }
+
     update('images', draft.images.filter((_, i) => i !== index) as Product['images']);
   };
 
@@ -99,19 +125,18 @@ export const ProductForm = (props: ProductFormProps) => {
       return;
     }
 
-    const colors = parseColors(colorsText);
-    if (colors.length === 0) {
-      window.alert('Ajoutez au moins un coloris.');
+    if (draft.colors.length === 0) {
+      window.alert('Sélectionnez au moins un coloris.');
       return;
     }
 
     if (draft.sizes.length === 0) {
-      window.alert('Ajoutez au moins une taille.');
+      window.alert('Sélectionnez au moins une taille.');
       return;
     }
 
     setSaving(true);
-    await props.onSave({ ...draft, colors });
+    await props.onSave(draft);
     router.push('/admin/produits');
   };
 
@@ -227,30 +252,57 @@ export const ProductForm = (props: ProductFormProps) => {
           </div>
         </div>
 
-        <label className="block">
-          <span className={labelClass}>Tailles (séparées par une virgule)</span>
-          <input
-            value={draft.sizes.join(', ')}
-            onChange={event => update(
-              'sizes',
-              event.target.value.split(',').map(size => size.trim()).filter(Boolean),
-            )}
-            className={fieldClass}
-          />
-        </label>
+        <div>
+          <span className={labelClass}>Tailles</span>
+          <div className="mt-3 space-y-3">
+            {SIZE_SCALES.map(scale => (
+              <div key={scale.label} className="flex flex-wrap items-center gap-2">
+                <span className="w-24 shrink-0 text-xs text-sage">{scale.label}</span>
+                {scale.sizes.map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleSize(size)}
+                    aria-pressed={draft.sizes.includes(size)}
+                    className={`label-micro border px-3 py-1.5 ${
+                      draft.sizes.includes(size)
+                        ? 'border-forest bg-forest text-paper'
+                        : 'border-line text-sage hover:border-forest hover:text-ink'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <label className="block">
-          <span className={labelClass}>
-            Coloris — une ligne par coloris, au format "Nom | #hex"
-          </span>
-          <textarea
-            rows={3}
-            value={colorsText}
-            onChange={event => setColorsText(event.target.value)}
-            placeholder="Écru | #efe9dd"
-            className={`${fieldClass} font-mono text-xs`}
-          />
-        </label>
+        <div>
+          <span className={labelClass}>Coloris</span>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {PRESET_COLORS.map(color => (
+              <button
+                key={color.name}
+                type="button"
+                onClick={() => toggleColor(color)}
+                aria-pressed={draft.colors.some(item => item.name === color.name)}
+                className={`flex items-center gap-2 border px-3 py-1.5 label-micro ${
+                  draft.colors.some(item => item.name === color.name)
+                    ? 'border-forest bg-forest text-paper'
+                    : 'border-line text-sage hover:border-forest hover:text-ink'
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className="size-3.5 shrink-0 rounded-full border border-ink/15"
+                  style={{ backgroundColor: color.hex }}
+                />
+                {color.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div>
           <span className={labelClass}>
@@ -287,7 +339,11 @@ export const ProductForm = (props: ProductFormProps) => {
               accept="image/*"
               multiple
               disabled={uploading}
-              onChange={event => onUploadImages(event.target.files)}
+              onChange={async (event) => {
+                await onUploadImages(event.target.files);
+                // Clears the selection so re-picking the same file still fires.
+                event.target.value = '';
+              }}
               className="hidden"
             />
             {uploading ? 'Envoi en cours…' : 'Ajouter des images'}
