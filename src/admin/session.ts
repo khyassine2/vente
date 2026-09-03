@@ -23,7 +23,7 @@ export const signInAdmin = async (password: string) => {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return true;
+  return true; 
 }; 
 
 export const signOutAdmin = async () => {
