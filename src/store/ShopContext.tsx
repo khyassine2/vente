@@ -1,3 +1,5 @@
+'use client';
+
 import type { AddToCartInput, CartItem } from '@/store/types';
 import { createContext, use, useEffect, useState } from 'react';
 import { readStorage, writeStorage } from '@/utils/storage';

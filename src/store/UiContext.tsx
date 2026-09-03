@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, use, useState } from 'react';
 
 export type Overlay = 'cart' | 'search' | 'menu' | null;

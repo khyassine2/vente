@@ -1,9 +1,11 @@
+'use client';
+
+import type { Product } from '@/data/types';
 import { X } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';
 import { ProductImage } from '@/components/ProductImage';
-import { PRODUCTS } from '@/data/products';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { useUi } from '@/store/UiContext';
 
@@ -21,9 +23,11 @@ const SECONDARY_LINKS = [
   { to: '/panier', label: 'Panier' },
 ];
 
-const PREVIEWS = [PRODUCTS[0], PRODUCTS[4]].filter(Boolean);
+type MobileMenuProps = {
+  previews: Product[];
+};
 
-export const MobileMenu = () => {
+export const MobileMenu = (props: MobileMenuProps) => {
   const ui = useUi();
   const open = ui.overlay === 'menu';
   const rootRef = useRef<HTMLDivElement>(null);
@@ -106,8 +110,7 @@ export const MobileMenu = () => {
       className="fixed inset-0 z-110 flex flex-col overflow-y-auto overscroll-contain bg-paper opacity-0"
     >
       <div className="shell flex h-16 shrink-0 items-center justify-between">
-        <Link
-          to="/"
+        <Link href="/"
           onClick={ui.close}
           className="font-display text-base tracking-[0.2em] uppercase"
         >
@@ -129,8 +132,7 @@ export const MobileMenu = () => {
         <ul>
           {MENU_LINKS.map(link => (
             <li key={link.to} className="border-b border-line">
-              <Link
-                to={link.to}
+              <Link href={link.to}
                 onClick={ui.close}
                 data-menu-item
                 className="block overflow-hidden py-4"
@@ -145,10 +147,10 @@ export const MobileMenu = () => {
       </nav>
 
       <div className="shell grid grid-cols-2 gap-3 pt-8">
-        {PREVIEWS.map(product => (
+        {props.previews.map(product => (
           <Link
             key={product.id}
-            to={`/produit/${product.slug}`}
+            href={`/produit/${product.slug}`}
             onClick={ui.close}
           >
             <div
@@ -171,8 +173,7 @@ export const MobileMenu = () => {
         <ul className="flex flex-wrap gap-x-6 gap-y-3">
           {SECONDARY_LINKS.map(link => (
             <li key={link.to} data-menu-secondary>
-              <Link
-                to={link.to}
+              <Link href={link.to}
                 onClick={ui.close}
                 className="label-micro text-sage"
               >

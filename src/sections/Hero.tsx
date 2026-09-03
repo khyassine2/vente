@@ -1,6 +1,7 @@
+'use client';
+
+import Link from 'next/link';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { parallaxImage } from '@/animations';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';
 import { splitText } from '@/animations/splitText';
 import { Magnetic } from '@/components/Magnetic';
@@ -12,16 +13,12 @@ const HERO_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d
 export const Hero = () => {
   const rootRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
 
   useGsapContext(rootRef, () => {
     const heading = headingRef.current;
 
     if (prefersReducedMotion()) {
-      gsap.set('[data-hero-fade], [data-hero-frame]', {
-        autoAlpha: 1,
-        clipPath: 'inset(0% 0% 0% 0%)',
-      });
+      gsap.set('[data-hero-fade], [data-hero-arch]', { autoAlpha: 1, y: 0, scale: 1 });
       if (heading) {
         gsap.set(heading, { autoAlpha: 1 });
       }
@@ -35,39 +32,28 @@ export const Hero = () => {
 
     const timeline = gsap.timeline({ defaults: { ease: 'expo.out' } });
 
-    timeline
-      .fromTo(
-        '[data-hero-frame]',
-        { clipPath: 'inset(0% 0% 100% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5 },
-        0,
-      )
-      .fromTo(
-        imageRef.current,
-        { scale: 1.25 },
-        { scale: 1, duration: 1.9 },
-        0,
-      );
+    timeline.fromTo(
+      '[data-hero-arch]',
+      { autoAlpha: 0, scale: 0.94, y: 24 },
+      { autoAlpha: 1, scale: 1, y: 0, duration: 1.3 },
+      0.1,
+    );
 
     if (split) {
       timeline.fromTo(
         split.targets,
         { yPercent: 118 },
-        { yPercent: 0, duration: 1.25, stagger: 0.09 },
-        0.35,
+        { yPercent: 0, duration: 1.1, stagger: 0.08 },
+        0.2,
       );
     }
 
     timeline.fromTo(
       '[data-hero-fade]',
-      { autoAlpha: 0, y: 24 },
-      { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 },
-      0.75,
+      { autoAlpha: 0, y: 22 },
+      { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.08 },
+      0.5,
     );
-
-    if (imageRef.current) {
-      parallaxImage(imageRef.current, { amount: 8, trigger: rootRef.current ?? undefined });
-    }
 
     return () => split?.revert();
   });
@@ -75,68 +61,82 @@ export const Hero = () => {
   return (
     <section
       ref={rootRef}
-      className="relative flex min-h-[92svh] flex-col justify-end overflow-hidden bg-forest text-paper"
+      className="relative overflow-hidden bg-[radial-gradient(120%_100%_at_50%_0%,#efe4d2_0%,#e8d8bd_38%,#d8c19c_72%,#c7a878_100%)] py-20 md:py-28"
     >
-      <div data-hero-frame className="absolute inset-0">
-        <ProductImage
-          ref={imageRef}
-          source={HERO_IMAGE}
-          alt="Silhouette en lin devant un mur clair"
-          sizes="100vw"
-          priority
-          className="size-full scale-110 object-cover object-[50%_35%]"
-        />
-        {/* Scrims keep both the nav and the headline legible over the photo. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-linear-to-t from-ink/80 via-ink/30 to-transparent"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-ink/55 to-transparent"
-        />
-      </div>
+      {/* Soft top glow, echoing the arch light in the reference layout. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(255,252,244,0.65)_0%,transparent_70%)]"
+      />
 
-      {/* Extra bottom padding on mobile keeps the CTAs clear of the floating
-          WhatsApp button. */}
-      <div className="shell relative z-10 pt-32 pb-24 md:pb-20">
-        <p data-hero-fade className="label-micro text-paper/70">
-          Collection Automne — Rabat
-        </p>
-
-        <h1
-          ref={headingRef}
-          className="mt-5 max-w-[18ch] font-display text-display font-light opacity-0"
-        >
-          Des pièces coupées pour durer
-        </h1>
-
-        <div className="mt-8 flex flex-col gap-6 md:mt-10 md:flex-row md:items-end md:justify-between">
-          <p
-            data-hero-fade
-            className="max-w-[46ch] text-[0.9375rem] leading-relaxed text-paper/80"
-          >
-            Un atelier, une trentaine de pièces par saison, des matières
-            choisies pour le climat d'ici. Rien de plus que ce qui se porte.
+      <div className="shell relative z-10 grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+        <div className="text-center lg:text-left">
+          <p data-hero-fade className="label-micro text-forest/70 opacity-0">
+            Nouvelle saison
           </p>
 
-          <div data-hero-fade className="flex flex-wrap items-start gap-3">
+          <h1
+            ref={headingRef}
+            className="mt-5 font-display text-display font-light text-ink opacity-0"
+          >
+            Fil
+            <span className="text-terracotta">&amp;</span>
+            Ligne
+          </h1>
+
+          <p
+            data-hero-fade
+            className="mx-auto mt-6 max-w-[46ch] text-[0.9375rem] leading-relaxed text-ink/70 opacity-0 lg:mx-0"
+          >
+            Des pièces coupées à la main, élégantes et intemporelles, pensées
+            pour accompagner vos journées avec douceur.
+          </p>
+
+          <div
+            data-hero-fade
+            className="mt-9 flex flex-wrap items-center justify-center gap-3 opacity-0 lg:justify-start"
+          >
             <Magnetic>
               <Link
-                to="/boutique/nouveautes"
-                className="inline-flex h-6 items-center justify-center bg-paper px-7 label-micro text-ink transition-colors duration-300 hover:bg-terracotta hover:text-paper"
+                href="/boutique"
+                className="inline-flex h-6 items-center justify-center bg-forest px-8 label-micro text-paper transition-colors duration-300 hover:bg-ink"
               >
-                Voir les nouveautés
+                Découvrir la collection
               </Link>
             </Magnetic>
-            <Magnetic>
-              <Link
-                to="/collections"
-                className="inline-flex h-6 items-center justify-center border border-paper/40 px-7 label-micro text-paper transition-colors duration-300 hover:border-paper hover:bg-paper/10"
-              >
-                Les collections
-              </Link>
-            </Magnetic>
+          </div>
+        </div>
+
+        {/* Two nested arches: the photograph, and a smaller wordmark arch
+            beside it — mirrors the reference layout while staying inside the
+            site's own palette and type. */}
+        <div className="relative mx-auto flex w-full max-w-md items-end justify-center gap-4 lg:max-w-none lg:justify-end">
+          <div
+            data-hero-arch
+            className="relative aspect-[3/4] w-[68%] overflow-hidden rounded-t-[999px] bg-paper-dim opacity-0 shadow-[0_30px_60px_-20px_rgba(20,32,27,0.35)]"
+          >
+            <ProductImage
+              source={HERO_IMAGE}
+              alt="Silhouette en lin devant un mur clair"
+              sizes="(min-width: 1024px) 32vw, 60vw"
+              priority
+              className="size-full object-cover object-[50%_25%]"
+            />
+          </div>
+
+          <div
+            data-hero-arch
+            className="relative flex aspect-[3/4] w-[38%] flex-col items-center justify-center gap-4 self-stretch overflow-hidden rounded-t-[999px] border border-forest/15 bg-paper/70 opacity-0 shadow-[0_20px_50px_-25px_rgba(20,32,27,0.3)] backdrop-blur-sm"
+          >
+            <p className="rotate-0 font-display text-3xl leading-none tracking-[0.14em] text-forest uppercase">
+              F
+              <span className="text-terracotta">&amp;</span>
+              L
+            </p>
+            <span aria-hidden className="text-terracotta">✦</span>
+            <p className="label-micro px-4 text-center text-forest/70">
+              Fil & Ligne
+            </p>
           </div>
         </div>
       </div>

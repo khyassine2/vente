@@ -1,5 +1,8 @@
+'use client';
+
+import type { Product } from '@/data/types';
+import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
 import { ScrollTrigger } from '@/animations/gsap';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Cursor } from '@/components/Cursor';
@@ -11,9 +14,15 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 import { SmoothScrollContext } from '@/store/SmoothScrollContext';
 
-export const Layout = () => {
+type LayoutProps = {
+  children: React.ReactNode;
+  products: Product[];
+  menuPreviews: Product[];
+};
+
+export const Layout = (props: LayoutProps) => {
   const lenis = useSmoothScroll();
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Land at the top of each new route without a smooth animated crawl.
@@ -24,7 +33,7 @@ export const Layout = () => {
     const frame = requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => cancelAnimationFrame(frame);
-  }, [location.pathname, lenis]);
+  }, [pathname, lenis]);
 
   return (
     <SmoothScrollContext value={{ lenis }}>
@@ -32,15 +41,15 @@ export const Layout = () => {
       <Header />
 
       <main id="main" className="min-h-screen">
-        <Outlet />
+        {props.children}
       </main>
 
       <Footer />
 
       <WhatsAppButton />
       <CartDrawer />
-      <SearchOverlay />
-      <MobileMenu />
+      <SearchOverlay products={props.products} />
+      <MobileMenu previews={props.menuPreviews} />
     </SmoothScrollContext>
   );
 };

@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { gsap, isFinePointer, prefersReducedMotion } from '@/animations/gsap';
 
@@ -6,12 +8,16 @@ import { gsap, isFinePointer, prefersReducedMotion } from '@/animations/gsap';
  * behind and expands over interactive elements. Never mounted on touch.
  */
 export const Cursor = () => {
-  // Both queries are readable on the first render, so no effect is needed to
-  // settle this — the cursor either mounts or it never does.
-  const [enabled] = useState(() => isFinePointer() && !prefersReducedMotion());
+  // Starts false to match the server render; an effect flips it after mount,
+  // once `window` is available, so hydration never sees mismatched output.
+  const [enabled, setEnabled] = useState(false);
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    setEnabled(isFinePointer() && !prefersReducedMotion());
+  }, []);
 
   useEffect(() => {
     const dot = dotRef.current;

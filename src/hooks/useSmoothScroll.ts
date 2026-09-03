@@ -1,3 +1,5 @@
+'use client';
+
 import Lenis from 'lenis';
 import { useEffect, useRef } from 'react';
 import { gsap, prefersReducedMotion, ScrollTrigger } from '@/animations/gsap';

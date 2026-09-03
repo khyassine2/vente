@@ -1,6 +1,9 @@
+'use client';
+
 import { Menu, Search, User } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRef } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
 import { gsap, prefersReducedMotion, ScrollTrigger } from '@/animations/gsap';
 import { CartButton } from '@/components/CartButton';
 import { useGsapContext } from '@/hooks/useGsapContext';
@@ -13,7 +16,7 @@ const NAV_LINKS = [
   { to: '/atelier', label: 'Atelier' },
 ];
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
+const linkClass = (isActive: boolean) =>
   [
     'relative label-micro py-2 transition-opacity duration-300',
     // Underline grows from the left on hover and stays put when active.
@@ -25,9 +28,9 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 export const Header = () => {
   const ui = useUi();
-  const location = useLocation();
+  const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
-  const isHome = location.pathname === '/';
+  const isHome = pathname === '/';
 
   useGsapContext(
     headerRef,
@@ -108,7 +111,7 @@ export const Header = () => {
           </button>
 
           <Link
-            to="/"
+            href="/"
             data-header-item
             aria-label="Fil et Ligne, accueil"
             className="shrink-0 font-display text-base leading-none tracking-[0.2em] whitespace-nowrap uppercase md:text-lg"
@@ -123,13 +126,19 @@ export const Header = () => {
           aria-label="Navigation principale"
           className="hidden min-w-0 items-center justify-center gap-7 lg:flex xl:gap-10"
         >
-          {NAV_LINKS.map(link => (
-            <span key={link.to} data-header-item className="shrink-0">
-              <NavLink to={link.to} end={link.to === '/boutique'} className={linkClass}>
-                {link.label}
-              </NavLink>
-            </span>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive = link.to === '/boutique'
+              ? pathname === link.to
+              : pathname === link.to || pathname.startsWith(`${link.to}/`);
+
+            return (
+              <span key={link.to} data-header-item className="shrink-0">
+                <Link href={link.to} className={linkClass(isActive)}>
+                  {link.label}
+                </Link>
+              </span>
+            );
+          })}
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-0.5 lg:flex-none">
@@ -145,7 +154,7 @@ export const Header = () => {
           </span>
           <span data-header-item className="hidden sm:inline-block">
             <Link
-              to="/compte"
+              href="/compte"
               aria-label="Mon compte"
               className="grid size-5.5 place-items-center"
             >

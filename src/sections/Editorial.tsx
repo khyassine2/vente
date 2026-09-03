@@ -1,5 +1,7 @@
+'use client';
+
+import Link from 'next/link';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { fadeUp, parallaxImage, revealImage, revealText } from '@/animations';
 import { ProductImage } from '@/components/ProductImage';
 import { useGsapContext } from '@/hooks/useGsapContext';
@@ -77,7 +79,7 @@ export const Editorial = () => {
           </div>
 
           <div data-editorial-body className="mt-9 opacity-0">
-            <Link to="/atelier" className="link-underline label-micro text-ink">
+            <Link href="/atelier" className="link-underline label-micro text-ink">
               Visiter l'atelier
             </Link>
           </div>

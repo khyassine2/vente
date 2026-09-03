@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 type Variant = 'solid' | 'outline' | 'ghost';
 
@@ -55,12 +55,12 @@ export const Button = (props: ButtonProps) => {
 };
 
 type ButtonLinkProps = ButtonBaseProps & {
-  to: string;
+  href: string;
   onClick?: () => void;
 };
 
 export const ButtonLink = (props: ButtonLinkProps) => (
-  <Link to={props.to} onClick={props.onClick} className={composeClass(props)}>
+  <Link href={props.href} onClick={props.onClick} className={composeClass(props)}>
     <span className="relative z-10">{props.children}</span>
   </Link>
 );

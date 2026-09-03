@@ -1,24 +1,25 @@
+'use client';
+
 import type { Product } from '@/data/types';
 import { Search, X } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';
 import { ProductImage } from '@/components/ProductImage';
-import { PRODUCTS } from '@/data/products';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { useUi } from '@/store/UiContext';
 import { formatPrice } from '@/utils/format';
 
 const SUGGESTIONS = ['Chemise', 'Lin', 'Maille', 'Robes', 'Accessoires'];
 
-const searchProducts = (query: string): Product[] => {
+const searchProducts = (products: Product[], query: string): Product[] => {
   const normalized = query.trim().toLowerCase();
 
   if (normalized.length < 2) {
     return [];
   }
 
-  return PRODUCTS.filter((product) => {
+  return products.filter((product) => {
     const haystack = [
       product.name,
       product.fabric,
@@ -32,7 +33,11 @@ const searchProducts = (query: string): Product[] => {
   }).slice(0, 8);
 };
 
-export const SearchOverlay = () => {
+type SearchOverlayProps = {
+  products: Product[];
+};
+
+export const SearchOverlay = (props: SearchOverlayProps) => {
   const ui = useUi();
   const open = ui.overlay === 'search';
   const [query, setQuery] = useState('');
@@ -43,7 +48,7 @@ export const SearchOverlay = () => {
 
   useScrollLock(open);
 
-  const results = searchProducts(query);
+  const results = searchProducts(props.products, query);
 
   useEffect(() => {
     if (!open) {
@@ -225,7 +230,7 @@ export const SearchOverlay = () => {
               <Link
                 key={product.id}
                 data-search-result
-                to={`/produit/${product.slug}`}
+                href={`/produit/${product.slug}`}
                 onClick={ui.close}
                 className="group"
               >

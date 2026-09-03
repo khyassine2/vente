@@ -1,13 +1,18 @@
+'use client';
+
+import type { Product } from '@/data/types';
+import Link from 'next/link';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { drawRule, fadeUp, revealText } from '@/animations';
 import { ProductCard } from '@/components/ProductCard';
-import { PRODUCTS } from '@/data/products';
 import { useGsapContext } from '@/hooks/useGsapContext';
 
-const FEATURED = PRODUCTS.filter(product => product.isNew).slice(0, 4);
+type FeaturedCollectionProps = {
+  products: Product[];
+};
 
-export const FeaturedCollection = () => {
+export const FeaturedCollection = (props: FeaturedCollectionProps) => {
+  const featured = props.products.filter(product => product.isNew).slice(0, 4);
   const rootRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -38,7 +43,7 @@ export const FeaturedCollection = () => {
 
         <Link
           data-featured-meta
-          to="/boutique/nouveautes"
+          href="/boutique/nouveautes"
           className="link-underline shrink-0 self-start label-micro text-ink opacity-0 md:self-auto"
         >
           Toute la sélection
@@ -48,7 +53,7 @@ export const FeaturedCollection = () => {
       <div data-rule className="mt-10 h-px w-full bg-line md:mt-14" />
 
       <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-12 md:mt-14 md:grid-cols-4 md:gap-x-6">
-        {FEATURED.map((product, index) => (
+        {featured.map((product, index) => (
           <div key={product.id} data-featured-card className="opacity-0">
             <ProductCard product={product} priority={index < 2} />
           </div>

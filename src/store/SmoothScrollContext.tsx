@@ -1,3 +1,5 @@
+'use client';
+
 import type Lenis from 'lenis';
 import type { RefObject } from 'react';
 import { createContext, use } from 'react';

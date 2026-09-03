@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
-import { isFinePointer } from '@/animations/gsap';
 import { magneticButton } from '@/animations';
+import { isFinePointer } from '@/animations/gsap';
 
 type MagneticProps = {
   children: React.ReactNode;

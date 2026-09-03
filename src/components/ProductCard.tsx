@@ -1,6 +1,8 @@
+'use client';
+
 import type { Product } from '@/data/types';
+import Link from 'next/link';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';
 import { ProductImage } from '@/components/ProductImage';
 import { WishlistButton } from '@/components/WishlistButton';
@@ -57,8 +59,7 @@ export const ProductCard = (props: ProductCardProps) => {
 
   return (
     <article className="group relative">
-      <Link
-        to={`/produit/${product.slug}`}
+      <Link href={`/produit/${product.slug}`}
         onClick={onNavigate}
         className="block"
         data-cursor="Voir"
@@ -118,7 +119,7 @@ export const ProductCard = (props: ProductCardProps) => {
       <div className="relative flex items-start justify-between gap-3 pt-4 md:transition-transform md:duration-500 md:ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:-translate-y-1">
         <div className="min-w-0">
           <h3 className="truncate font-sans text-[0.9375rem] leading-snug font-medium">
-            <Link to={`/produit/${product.slug}`} onClick={onNavigate}>
+            <Link href={`/produit/${product.slug}`} onClick={onNavigate}>
               {product.name}
             </Link>
           </h3>

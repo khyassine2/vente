@@ -1,3 +1,5 @@
+'use client';
+
 import type { DependencyList, RefObject } from 'react';
 import { useEffect } from 'react';
 import { gsap } from '@/animations/gsap';

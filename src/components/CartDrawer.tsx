@@ -1,7 +1,9 @@
+'use client';
+
 import type { CartItem } from '@/store/types';
 import { Minus, Plus, X } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { animateNumber } from '@/animations';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';
 import { Button } from '@/components/Button';
@@ -224,8 +226,7 @@ export const CartDrawer = () => {
                     Paiement à la livraison disponible.
                   </p>
 
-                  <Link
-                    to="/commande"
+                  <Link href="/commande"
                     onClick={ui.close}
                     className="mt-5 flex min-h-6 w-full items-center justify-center bg-forest py-2 label-micro text-paper transition-colors duration-300 hover:bg-ink"
                   >
@@ -251,8 +252,7 @@ const CartRow = (props: CartRowProps) => {
 
   return (
     <li ref={rowRef} data-cart-item className="flex gap-4 py-5">
-      <Link
-        to={`/produit/${item.slug}`}
+      <Link href={`/produit/${item.slug}`}
         className="w-10 shrink-0 overflow-hidden bg-paper-dim"
       >
         <ProductImage

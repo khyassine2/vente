@@ -1,8 +1,10 @@
+'use client';
+
+import Link from 'next/link';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { fadeUp, revealText } from '@/animations';
 import { ProductImage } from '@/components/ProductImage';
-import { CATEGORIES } from '@/data/products';
+import { CATEGORIES } from '@/data/categories';
 import { useGsapContext } from '@/hooks/useGsapContext';
 
 // The four categories that carry the season, in reading order.
@@ -33,7 +35,7 @@ export const CategoryShowcase = () => {
             <Link
               key={category.slug}
               data-category-card
-              to={`/boutique/${category.slug}`}
+              href={`/boutique/${category.slug}`}
               data-cursor="Voir"
               className="group relative block overflow-hidden opacity-0"
             >

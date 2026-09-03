@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef } from 'react';
 import { marquee } from '@/animations';
 import { useGsapContext } from '@/hooks/useGsapContext';

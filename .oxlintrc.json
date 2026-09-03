@@ -1,11 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "unicorn"],
-  "categories": {
-    "correctness": "error",
-    "suspicious": "warn"
-  },
+  "plugins": ["react", "typescript", "oxc"],
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
   }
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import { Heart } from 'lucide-react';
 import { useRef } from 'react';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';

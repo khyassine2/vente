@@ -1,3 +1,5 @@
+'use client';
+
 import { ShoppingBag } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { gsap, prefersReducedMotion } from '@/animations/gsap';

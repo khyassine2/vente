@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, use, useRef } from 'react';
 import { Flip, prefersReducedMotion } from '@/animations/gsap';
 

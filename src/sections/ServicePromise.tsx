@@ -1,3 +1,5 @@
+'use client';
+
 import { Ruler, Scissors, Truck, Undo2 } from 'lucide-react';
 import { useRef } from 'react';
 import { fadeUp, revealText } from '@/animations';

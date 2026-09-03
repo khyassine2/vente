@@ -1,5 +1,7 @@
+'use client';
+
+import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { fadeUp } from '@/animations';
 import { useGsapContext } from '@/hooks/useGsapContext';
 
@@ -98,8 +100,7 @@ export const Footer = () => {
                 <ul className="mt-5 space-y-3">
                   {column.links.map(link => (
                     <li key={link.to}>
-                      <Link
-                        to={link.to}
+                      <Link href={link.to}
                         className="link-underline text-[0.875rem] text-ink"
                       >
                         {link.label}
@@ -116,8 +117,7 @@ export const Footer = () => {
           data-footer-block
           className="mt-16 flex flex-col gap-6 border-t border-line pt-8 md:flex-row md:items-end md:justify-between"
         >
-          <Link
-            to="/"
+          <Link href="/"
             className="font-display text-2xl leading-none tracking-[0.18em] uppercase md:text-3xl"
           >
             Fil
