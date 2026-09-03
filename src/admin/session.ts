@@ -24,7 +24,7 @@ export const signInAdmin = async (password: string) => {
   });
 
   return true;
-};
+}; 
 
 export const signOutAdmin = async () => {
   const jar = await cookies();
