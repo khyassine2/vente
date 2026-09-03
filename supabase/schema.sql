@@ -118,5 +118,11 @@ create policy "Public read product-images bucket"
   to anon, authenticated
   using (bucket_id = 'product-images');
 
--- Uploads/deletes to this bucket are performed by the admin app using the
--- service_role key, which bypasses storage RLS as well.
+-- Deletes to this bucket are performed by the admin app using the service_role
+-- key, which bypasses storage RLS as well.
+--
+-- Uploads go straight from the admin's browser to a signed upload URL. That URL
+-- is minted server-side with the service_role key, and only after the admin
+-- session check, so no anon INSERT policy is needed here: the signature is the
+-- authorization. Photos would otherwise blow past the 1 MB Server Action body
+-- cap on their way through the server.

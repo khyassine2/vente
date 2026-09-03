@@ -15,33 +15,38 @@ const requireAdmin = async () => {
 const IMAGE_BUCKET = 'product-images';
 
 /**
- * Uploads one product photo to storage and returns its public URL.
+ * Issues a one-shot signed URL the browser uploads the photo to directly.
  *
- * Called directly from a change handler rather than as a form action, so an
- * expired session must come back as a value: `redirect()` throws, and that
- * throw surfaces to the browser as a 500 instead of a navigation.
+ * The file bytes deliberately never pass through this action: Server Action
+ * bodies are capped at 1 MB (and 4.5 MB on Vercel regardless of config), which
+ * any full-resolution photograph blows straight past.
+ *
+ * Returns the failure as a value rather than throwing — production builds strip
+ * error messages, so a throw would reach the admin as an opaque 500.
  */
-export const uploadProductImage = async (
-  file: File,
-): Promise<{ url: string } | { error: string }> => {
+export const createProductImageUpload = async (
+  fileName: string,
+): Promise<{ path: string; token: string; url: string } | { error: string }> => {
   if (!(await isAdminAuthenticated())) {
     return { error: 'Session expirée. Reconnectez-vous pour envoyer des images.' };
   }
 
-  const extension = file.name.split('.').pop() ?? 'jpg';
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? 'jpg';
   const path = `${crypto.randomUUID()}.${extension}`;
 
-  const { error } = await supabaseAdmin.storage
+  const { data, error } = await supabaseAdmin.storage
     .from(IMAGE_BUCKET)
-    .upload(path, file, { contentType: file.type });
+    .createSignedUploadUrl(path);
 
-  if (error) {
-    return { error: error.message };
+  if (error || !data) {
+    return { error: error?.message ?? 'Impossible de préparer l’envoi.' };
   }
 
-  const { data } = supabaseAdmin.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+  const { data: publicUrl } = supabaseAdmin.storage
+    .from(IMAGE_BUCKET)
+    .getPublicUrl(path);
 
-  return { url: data.publicUrl };
+  return { path: data.path, token: data.token, url: publicUrl.publicUrl };
 };
 
 /** Replaces every variant and image row for a product with the given sets. */

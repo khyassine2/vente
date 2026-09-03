@@ -3,10 +3,11 @@
 import type { CategorySlug, Product, ProductColor } from '@/data/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { uploadProductImage } from '@/admin/products';
+import { createProductImageUpload } from '@/admin/products';
 import { Button } from '@/components/Button';
 import { CATEGORIES } from '@/data/categories';
 import { ALL_SIZES, PRESET_COLORS, SIZE_SCALES } from '@/data/variants';
+import { supabasePublic } from '@/libs/supabase/public';
 
 const fieldClass = 'mt-2 w-full border border-line bg-paper px-4 py-3 text-ink outline-none focus:border-forest';
 const labelClass = 'label-micro text-sage';
@@ -14,6 +15,39 @@ const labelClass = 'label-micro text-sage';
 /** One line per entry, parsed back on change — simplest editor for a list field. */
 const linesToList = (value: string) =>
   value.split('\n').map(line => line.trim()).filter(Boolean);
+
+/** Supabase Storage's own ceiling; caught here so the failure names the file. */
+const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
+
+/**
+ * Sends one photo straight to storage via a signed URL. Only the file name goes
+ * through the Server Action, keeping the request far under its 1 MB body cap.
+ */
+const uploadOneImage = async (
+  file: File,
+): Promise<{ url: string } | { error: string }> => {
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: `« ${file.name} » dépasse 50 Mo.` };
+  }
+
+  const ticket = await createProductImageUpload(file.name);
+
+  if ('error' in ticket) {
+    return { error: ticket.error };
+  }
+
+  const { error } = await supabasePublic.storage
+    .from('product-images')
+    .uploadToSignedUrl(ticket.path, ticket.token, file, {
+      contentType: file.type,
+    });
+
+  if (error) {
+    return { error: `« ${file.name} » : ${error.message}` };
+  }
+
+  return { url: ticket.url };
+};
 
 const emptyDraft = (): Omit<Product, 'id'> => ({
   slug: '',
@@ -55,6 +89,10 @@ export const ProductForm = (props: ProductFormProps) => {
     );
   };
 
+  // Sizes saved before the scales existed have no button to toggle them, so
+  // they are carried through untouched rather than dropped on the next save.
+  const customSizes = draft.sizes.filter(size => !ALL_SIZES.includes(size));
+
   // Sizes and colours are kept in catalogue order, not click order, so two
   // products with the same selection always store the same sequence.
   const toggleSize = (size: string) => {
@@ -62,16 +100,21 @@ export const ProductForm = (props: ProductFormProps) => {
       ? draft.sizes.filter(item => item !== size)
       : [...draft.sizes, size];
 
-    update('sizes', ALL_SIZES.filter(item => next.includes(item)));
+    update('sizes', [...ALL_SIZES.filter(item => next.includes(item)), ...customSizes]);
   };
+
+  const customColors = draft.colors.filter(color =>
+    !PRESET_COLORS.some(preset => preset.name === color.name));
 
   const toggleColor = (color: ProductColor) => {
     const next = draft.colors.some(item => item.name === color.name)
       ? draft.colors.filter(item => item.name !== color.name)
       : [...draft.colors, color];
 
-    update('colors', PRESET_COLORS.filter(preset =>
-      next.some(item => item.name === preset.name)));
+    update('colors', [
+      ...PRESET_COLORS.filter(preset => next.some(item => item.name === preset.name)),
+      ...customColors,
+    ]);
   };
 
   const onUploadImages = async (fileList: FileList | null) => {
@@ -82,7 +125,7 @@ export const ProductForm = (props: ProductFormProps) => {
     setUploading(true);
 
     const results = await Promise.all(
-      Array.from(fileList).map(file => uploadProductImage(file)),
+      Array.from(fileList).map(file => uploadOneImage(file)),
     );
 
     setUploading(false);
@@ -276,6 +319,16 @@ export const ProductForm = (props: ProductFormProps) => {
               </div>
             ))}
           </div>
+
+          {customSizes.length > 0 && (
+            <p className="mt-3 text-xs text-sage">
+              Hors barème :
+              {' '}
+              {customSizes.join(', ')}
+              {' '}
+              — conservées à l’enregistrement.
+            </p>
+          )}
         </div>
 
         <div>
@@ -302,6 +355,16 @@ export const ProductForm = (props: ProductFormProps) => {
               </button>
             ))}
           </div>
+
+          {customColors.length > 0 && (
+            <p className="mt-3 text-xs text-sage">
+              Hors palette :
+              {' '}
+              {customColors.map(color => color.name).join(', ')}
+              {' '}
+              — conservés à l’enregistrement.
+            </p>
+          )}
         </div>
 
         <div>
